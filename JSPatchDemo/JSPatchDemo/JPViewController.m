@@ -23,7 +23,7 @@
 - (void)handleBtn:(id)sender
 {
     self.title=@"1988";
-    NSLog(@"我 开始远行 了");
+    NSLog(@"我开始远行了 ，然而它是把代码覆盖掉了");
 }
 
 @end

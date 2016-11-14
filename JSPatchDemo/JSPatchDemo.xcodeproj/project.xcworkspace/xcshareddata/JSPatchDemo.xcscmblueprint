@@ -1,20 +1,22 @@
 {
-  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "0104904A6E66B3737E89F93E333177FA001D0B29",
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : 9223372036854775807,
     "0104904A6E66B3737E89F93E333177FA001D0B29" : 9223372036854775807,
-    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : 9223372036854775807
+    "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8" : 9223372036854775807
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D8339F87-05BE-45F4-86EA-86ACB980B074",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : "",
     "0104904A6E66B3737E89F93E333177FA001D0B29" : "JSPatch\/",
-    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : ""
+    "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8" : "iOS_Demo\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "JSPatchDemo",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
-  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Demo\/iOSDemo\/JSPatchDemo.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "JSPatchDemo\/JSPatchDemo.xcodeproj",
   "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/bang590\/JSPatch.git",
@@ -25,6 +27,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/UIView\/learn_objec_demo.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/UIView\/iOS_Demo.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8"
     }
   ]
 }
