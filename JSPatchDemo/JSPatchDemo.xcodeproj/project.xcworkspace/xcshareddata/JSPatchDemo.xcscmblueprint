@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "0104904A6E66B3737E89F93E333177FA001D0B29",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "0104904A6E66B3737E89F93E333177FA001D0B29" : 9223372036854775807,
+    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D8339F87-05BE-45F4-86EA-86ACB980B074",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "0104904A6E66B3737E89F93E333177FA001D0B29" : "JSPatch\/",
+    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "JSPatchDemo",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Demo\/iOSDemo\/JSPatchDemo.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/bang590\/JSPatch.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0104904A6E66B3737E89F93E333177FA001D0B29"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/UIView\/learn_objec_demo.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093"
+    }
+  ]
+}
