@@ -14,6 +14,7 @@
 		04E55C801DF6C23F009DFE12 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04E55C7E1DF6C23F009DFE12 /* Main.storyboard */; };
 		04E55C821DF6C23F009DFE12 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04E55C811DF6C23F009DFE12 /* Assets.xcassets */; };
 		04E55C851DF6C23F009DFE12 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04E55C831DF6C23F009DFE12 /* LaunchScreen.storyboard */; };
+		04FFDA3D1E2C6DB500A17168 /* TestSecondViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04FFDA3C1E2C6DB500A17168 /* TestSecondViewController.m */; };
 		F4F45783A3691AB90592F168 /* libPods-RecordCrashLogTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 232BCECAFAE3C20E3B0094C8 /* libPods-RecordCrashLogTest.a */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +31,8 @@
 		04E55C811DF6C23F009DFE12 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04E55C841DF6C23F009DFE12 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		04E55C861DF6C23F009DFE12 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04FFDA3B1E2C6DB500A17168 /* TestSecondViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSecondViewController.h; sourceTree = "<group>"; };
+		04FFDA3C1E2C6DB500A17168 /* TestSecondViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSecondViewController.m; sourceTree = "<group>"; };
 		232BCECAFAE3C20E3B0094C8 /* libPods-RecordCrashLogTest.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RecordCrashLogTest.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		29769FBD20598F9626DA605C /* Pods-RecordCrashLogTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RecordCrashLogTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-RecordCrashLogTest/Pods-RecordCrashLogTest.release.xcconfig"; sourceTree = "<group>"; };
 		F671DCA753FAD557BE5F8923 /* Pods-RecordCrashLogTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RecordCrashLogTest.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RecordCrashLogTest/Pods-RecordCrashLogTest.debug.xcconfig"; sourceTree = "<group>"; };
@@ -82,6 +85,8 @@
 				04E55C791DF6C23F009DFE12 /* AppDelegate.m */,
 				04E55C7B1DF6C23F009DFE12 /* ViewController.h */,
 				04E55C7C1DF6C23F009DFE12 /* ViewController.m */,
+				04FFDA3B1E2C6DB500A17168 /* TestSecondViewController.h */,
+				04FFDA3C1E2C6DB500A17168 /* TestSecondViewController.m */,
 				04E55C7E1DF6C23F009DFE12 /* Main.storyboard */,
 				04E55C811DF6C23F009DFE12 /* Assets.xcassets */,
 				04E55C831DF6C23F009DFE12 /* LaunchScreen.storyboard */,
@@ -242,6 +247,7 @@
 				04E55C7D1DF6C23F009DFE12 /* ViewController.m in Sources */,
 				040FAF4D1DF8218A00A2BF9E /* RHCrashLogHelp.m in Sources */,
 				04E55C7A1DF6C23F009DFE12 /* AppDelegate.m in Sources */,
+				04FFDA3D1E2C6DB500A17168 /* TestSecondViewController.m in Sources */,
 				04E55C771DF6C23F009DFE12 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

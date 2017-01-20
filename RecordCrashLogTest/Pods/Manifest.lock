@@ -1,4 +1,5 @@
 PODS:
+  - AvoidCrash (1.6.2)
   - KSCrash (1.11.1):
     - KSCrash/Installations (= 1.11.1)
   - KSCrash/Installations (1.11.1):
@@ -62,11 +63,13 @@ PODS:
     - KSCrash/Recording
 
 DEPENDENCIES:
+  - AvoidCrash (~> 1.6.2)
   - KSCrash (~> 1.11.1)
 
 SPEC CHECKSUMS:
+  AvoidCrash: 431a3667e5f04d85ea172b467e5578bb6a569c09
   KSCrash: d645998dd862f8f05b7bae8444e36a64f223c35e
 
-PODFILE CHECKSUM: 3320d1e52856454937c7b934660ee4dd9b97dbc2
+PODFILE CHECKSUM: 72c185b005fd53268b569a3851c04ad9cfc94e40
 
 COCOAPODS: 1.1.0.rc.2

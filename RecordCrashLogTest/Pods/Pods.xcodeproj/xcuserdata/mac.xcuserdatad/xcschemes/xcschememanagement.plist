@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>AvoidCrash.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>KSCrash.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -17,12 +22,17 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>CDC181C6E954B2403B2C5F3B79696601</key>
+		<key>6B0089AEE898A1D12C18B4028E492B3D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>CDCC94EDAC404018712C7B9B60E02AD7</key>
+		<key>80B0ABEDE87AE5E53ED2AE95C8D19ECD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>CDC181C6E954B2403B2C5F3B79696601</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -35,12 +35,15 @@
     [self crashLogTest];
 }
 - (IBAction)cleanCrashLogAction:(id)sender {
-    
-    [[KSCrash sharedInstance] deleteAllReports];
+    self.crashLogText.text =@"";
 }
 #pragma mark - crash test
 -(void)crashLogTest{
     NSInteger type=arc4random()%4;
+    
+    NSLog(@"[arc4random type］ = %@",@(type));
+    
+    
     switch (type) {
         case 0:
         {
@@ -61,25 +64,20 @@
             break;
         case 2:
         {
-            
+            // c++ 指针
+            [[KSCrash sharedInstance] deleteAllReports];
         }
             break;
         case 3:
         {
-            
+            UIImageView *subCrashView =[self.view viewWithTag:100];
+            subCrashView.image =[UIImage imageNamed:@"没有这个对象"];
         }
             break;
             
         default:
             break;
     }
-    //
-    
-    //
-    
-    //
-    
-    //
     
 }
 @end

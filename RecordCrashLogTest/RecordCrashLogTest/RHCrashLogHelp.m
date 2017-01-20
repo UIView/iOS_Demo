@@ -9,6 +9,7 @@
 #import "RHCrashLogHelp.h"
 #import <UIKit/UIKit.h>
 #include <libkern/OSAtomic.h>
+#include <signal.h>
 #include <execinfo.h>
 
 #define CrashRHCrashLogHelpSignalExceptionName    @"CrashExceptionHandlerSignalExceptionName"
@@ -98,7 +99,6 @@ void InstallRHCrashUncaughtExceptionHandler(void)
     
     NSString *devicesInfo=[RHCrashLogHelp validateAndSaveHardwareDevicesInfo];
     
-    [NSThread callStackSymbols];
     NSString *mainLastThrowString = [NSString stringWithFormat:@"\n Last Thread Throw: %@ \n",[NSThread callStackSymbols]];
     NSString *exceptionInfo = [NSString stringWithFormat:@"%@\nCrash Date: %@ \nException reason：%@\nException name：%@\nException stack：%@ \n\n%@ \n\n%@",devicesInfo,tempDateString, reason,name, stackArray,[exception userInfo],mainLastThrowString];
     

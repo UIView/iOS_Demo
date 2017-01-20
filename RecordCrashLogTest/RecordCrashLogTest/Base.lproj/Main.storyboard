@@ -22,6 +22,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view hidden="YES" tag="100" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZQc-J8-1IE">
+                                <rect key="frame" x="8" y="439" width="240" height="128"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="Y5H-gu-DKk"/>
+                                    <constraint firstAttribute="height" constant="128" id="mFW-tP-GLS"/>
+                                </constraints>
+                            </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aUd-rE-af0">
                                 <rect key="frame" x="261" y="586" width="104" height="30"/>
                                 <constraints>
@@ -58,7 +66,9 @@
                             <constraint firstAttribute="trailing" secondItem="aUd-rE-af0" secondAttribute="trailing" constant="10" id="GNY-t4-kGr"/>
                             <constraint firstItem="Jtt-cN-XyV" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="XLK-0G-j5F"/>
                             <constraint firstItem="Jtt-cN-XyV" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" constant="16" id="XXJ-4m-UJ2"/>
+                            <constraint firstItem="ZQc-J8-1IE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="8" id="f9i-oM-TsS"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Ut0-Ta-Nyk" secondAttribute="bottom" constant="51" id="iFM-SF-HY6"/>
+                            <constraint firstItem="Ut0-Ta-Nyk" firstAttribute="top" secondItem="ZQc-J8-1IE" secondAttribute="bottom" constant="19" id="tNd-SF-GK3"/>
                             <constraint firstItem="Ut0-Ta-Nyk" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="tX1-S0-VhB"/>
                             <constraint firstItem="aUd-rE-af0" firstAttribute="top" secondItem="Jtt-cN-XyV" secondAttribute="bottom" constant="19" id="uMx-ls-BKq"/>
                         </constraints>
