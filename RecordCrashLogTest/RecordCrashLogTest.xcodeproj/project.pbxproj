@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		040FAF4D1DF8218A00A2BF9E /* RHCrashLogHelp.m in Sources */ = {isa = PBXBuildFile; fileRef = 040FAF4C1DF8218A00A2BF9E /* RHCrashLogHelp.m */; };
+		043FF9971E49C24A008E486B /* RHUploadCrashStandard.m in Sources */ = {isa = PBXBuildFile; fileRef = 043FF9961E49C24A008E486B /* RHUploadCrashStandard.m */; };
+		043FF99A1E49C8F4008E486B /* RHUploadCrashFileter.m in Sources */ = {isa = PBXBuildFile; fileRef = 043FF9991E49C8F4008E486B /* RHUploadCrashFileter.m */; };
 		04E55C771DF6C23F009DFE12 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E55C761DF6C23F009DFE12 /* main.m */; };
 		04E55C7A1DF6C23F009DFE12 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E55C791DF6C23F009DFE12 /* AppDelegate.m */; };
 		04E55C7D1DF6C23F009DFE12 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E55C7C1DF6C23F009DFE12 /* ViewController.m */; };
@@ -21,6 +23,10 @@
 /* Begin PBXFileReference section */
 		040FAF4B1DF8218A00A2BF9E /* RHCrashLogHelp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHCrashLogHelp.h; sourceTree = "<group>"; };
 		040FAF4C1DF8218A00A2BF9E /* RHCrashLogHelp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHCrashLogHelp.m; sourceTree = "<group>"; };
+		043FF9951E49C24A008E486B /* RHUploadCrashStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHUploadCrashStandard.h; sourceTree = "<group>"; };
+		043FF9961E49C24A008E486B /* RHUploadCrashStandard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHUploadCrashStandard.m; sourceTree = "<group>"; };
+		043FF9981E49C8F4008E486B /* RHUploadCrashFileter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHUploadCrashFileter.h; sourceTree = "<group>"; };
+		043FF9991E49C8F4008E486B /* RHUploadCrashFileter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHUploadCrashFileter.m; sourceTree = "<group>"; };
 		04E55C721DF6C23F009DFE12 /* RecordCrashLogTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RecordCrashLogTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04E55C761DF6C23F009DFE12 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		04E55C781DF6C23F009DFE12 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -59,6 +65,17 @@
 			name = CrashGroup;
 			sourceTree = "<group>";
 		};
+		043FF98A1E49B3B9008E486B /* KSCrashUp */ = {
+			isa = PBXGroup;
+			children = (
+				043FF9951E49C24A008E486B /* RHUploadCrashStandard.h */,
+				043FF9961E49C24A008E486B /* RHUploadCrashStandard.m */,
+				043FF9981E49C8F4008E486B /* RHUploadCrashFileter.h */,
+				043FF9991E49C8F4008E486B /* RHUploadCrashFileter.m */,
+			);
+			name = KSCrashUp;
+			sourceTree = "<group>";
+		};
 		04E55C691DF6C23F009DFE12 = {
 			isa = PBXGroup;
 			children = (
@@ -80,6 +97,7 @@
 		04E55C741DF6C23F009DFE12 /* RecordCrashLogTest */ = {
 			isa = PBXGroup;
 			children = (
+				043FF98A1E49B3B9008E486B /* KSCrashUp */,
 				040FAF4A1DF8215A00A2BF9E /* CrashGroup */,
 				04E55C781DF6C23F009DFE12 /* AppDelegate.h */,
 				04E55C791DF6C23F009DFE12 /* AppDelegate.m */,
@@ -249,6 +267,8 @@
 				04E55C7A1DF6C23F009DFE12 /* AppDelegate.m in Sources */,
 				04FFDA3D1E2C6DB500A17168 /* TestSecondViewController.m in Sources */,
 				04E55C771DF6C23F009DFE12 /* main.m in Sources */,
+				043FF99A1E49C8F4008E486B /* RHUploadCrashFileter.m in Sources */,
+				043FF9971E49C24A008E486B /* RHUploadCrashStandard.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +390,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = A89QXMNZDV;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/RecordCrashLogTest",
+				);
 				INFOPLIST_FILE = RecordCrashLogTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nimo.RecordCrashLogTest;
@@ -383,6 +407,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = A89QXMNZDV;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/RecordCrashLogTest",
+				);
 				INFOPLIST_FILE = RecordCrashLogTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nimo.RecordCrashLogTest;

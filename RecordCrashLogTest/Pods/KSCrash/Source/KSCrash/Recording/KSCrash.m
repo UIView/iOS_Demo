@@ -25,22 +25,21 @@
 //
 
 
-#import "KSCrashAdvanced.h"
+#import "KSCrash.h"
 
 #import "KSCrashC.h"
-#import "KSCrashCallCompletion.h"
 #import "KSCrashDoctor.h"
 #import "KSCrashReportFields.h"
-#import "KSCrashReportFixer.h"
-#import "KSCrashReportStore.h"
-#import "KSCrashState.h"
+#import "KSCrashMonitor_AppState.h"
 #import "KSJSONCodecObjC.h"
-#import "KSSingleton.h"
 #import "NSError+SimpleConstructor.h"
+#import "KSCrashMonitorContext.h"
+#import "KSCrashMonitor_System.h"
 
 //#define KSLogger_LocalLevel TRACE
 #import "KSLogger.h"
 
+#include <inttypes.h>
 #if KSCRASH_HAS_UIKIT
 #import <UIKit/UIKit.h>
 #endif
@@ -54,12 +53,6 @@
 
 @property(nonatomic,readwrite,retain) NSString* bundleName;
 @property(nonatomic,readwrite,retain) NSString* basePath;
-
-// Mirrored from KSCrashAdvanced.h to provide ivars
-@property(nonatomic,readwrite,retain) id<KSCrashReportFilter> sink;
-@property(nonatomic,readwrite,assign) KSReportWriteCallback onCrash;
-@property(nonatomic,readwrite,assign) bool printTraceToStdout;
-@property(nonatomic,readwrite,assign) KSCrashDemangleLanguage demangleLanguages;
 
 @end
 
@@ -104,25 +97,33 @@ static NSString* getBasePath()
 @synthesize sink = _sink;
 @synthesize userInfo = _userInfo;
 @synthesize deleteBehaviorAfterSendAll = _deleteBehaviorAfterSendAll;
-@synthesize handlingCrashTypes = _handlingCrashTypes;
+@synthesize monitoring = _monitoring;
 @synthesize deadlockWatchdogInterval = _deadlockWatchdogInterval;
-@synthesize printTraceToStdout = _printTraceToStdout;
 @synthesize onCrash = _onCrash;
 @synthesize bundleName = _bundleName;
 @synthesize basePath = _basePath;
-@synthesize searchThreadNames = _searchThreadNames;
-@synthesize searchQueueNames = _searchQueueNames;
 @synthesize introspectMemory = _introspectMemory;
 @synthesize catchZombies = _catchZombies;
 @synthesize doNotIntrospectClasses = _doNotIntrospectClasses;
 @synthesize demangleLanguages = _demangleLanguages;
+@synthesize addConsoleLogToReport = _addConsoleLogToReport;
+@synthesize maxReportCount = _maxReportCount;
 
 
 // ============================================================================
 #pragma mark - Lifecycle -
 // ============================================================================
 
-IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
++ (instancetype) sharedInstance
+{
+    static KSCrash *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[KSCrash alloc] init];
+    });
+    return sharedInstance;
+}
 
 - (id) init
 {
@@ -136,10 +137,10 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
             return nil;
         }
         self.deleteBehaviorAfterSendAll = KSCDeleteAlways;
-        self.searchThreadNames = NO;
-        self.searchQueueNames = NO;
         self.introspectMemory = YES;
         self.catchZombies = NO;
+        self.maxReportCount = 5;
+        self.monitoring = KSCrashMonitorTypeProductionSafeMinimal;
     }
     return self;
 }
@@ -149,29 +150,37 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
 #pragma mark - API -
 // ============================================================================
 
-- (void) setUserInfo:(NSDictionary*) userInfo
+- (NSDictionary*) userInfo
 {
-    NSError* error = nil;
-    NSData* userInfoJSON = nil;
-    if(userInfo != nil)
-    {
-        userInfoJSON = [self nullTerminated:[KSJSONCodec encode:userInfo
-                                                        options:KSJSONEncodeOptionSorted
-                                                          error:&error]];
-        if(error != NULL)
-        {
-            KSLOG_ERROR(@"Could not serialize user info: %@", error);
-            return;
-        }
-    }
-    
-    _userInfo = userInfo;
-    kscrash_setUserInfoJSON([userInfoJSON bytes]);
+   return _userInfo;
 }
 
-- (void) setHandlingCrashTypes:(KSCrashType)handlingCrashTypes
+- (void) setUserInfo:(NSDictionary*) userInfo
 {
-    _handlingCrashTypes = kscrash_setHandlingCrashTypes(handlingCrashTypes);
+    @synchronized (self)
+    {
+        NSError* error = nil;
+        NSData* userInfoJSON = nil;
+        if(userInfo != nil)
+        {
+            userInfoJSON = [self nullTerminated:[KSJSONCodec encode:userInfo
+                                                            options:KSJSONEncodeOptionSorted
+                                                              error:&error]];
+            if(error != NULL)
+            {
+                KSLOG_ERROR(@"Could not serialize user info: %@", error);
+                return;
+            }
+        }
+        
+        _userInfo = userInfo;
+        kscrash_setUserInfoJSON([userInfoJSON bytes]);
+    }
+}
+
+- (void) setMonitoring:(KSCrashMonitorType)monitoring
+{
+    _monitoring = kscrash_setMonitoring(monitoring);
 }
 
 - (void) setDeadlockWatchdogInterval:(double) deadlockWatchdogInterval
@@ -180,40 +189,22 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
     kscrash_setDeadlockWatchdogInterval(deadlockWatchdogInterval);
 }
 
-- (void) setPrintTraceToStdout:(bool)printTraceToStdout
-{
-    _printTraceToStdout = printTraceToStdout;
-    kscrash_setPrintTraceToStdout(printTraceToStdout);
-}
-
 - (void) setOnCrash:(KSReportWriteCallback) onCrash
 {
     _onCrash = onCrash;
     kscrash_setCrashNotifyCallback(onCrash);
 }
 
-- (void) setSearchThreadNames:(bool)searchThreadNames
-{
-    _searchThreadNames = searchThreadNames;
-    kscrash_setSearchThreadNames(searchThreadNames);
-}
-
-- (void) setSearchQueueNames:(bool)searchQueueNames
-{
-    _searchQueueNames = searchQueueNames;
-    kscrash_setSearchQueueNames(searchQueueNames);
-}
-
-- (void) setIntrospectMemory:(bool) introspectMemory
+- (void) setIntrospectMemory:(BOOL) introspectMemory
 {
     _introspectMemory = introspectMemory;
     kscrash_setIntrospectMemory(introspectMemory);
 }
 
-- (void) setCatchZombies:(bool)catchZombies
+- (void) setCatchZombies:(BOOL)catchZombies
 {
     _catchZombies = catchZombies;
-    kscrash_setCatchZombies(catchZombies);
+    self.monitoring |= KSCrashMonitorTypeZombie;
 }
 
 - (void) setDoNotIntrospectClasses:(NSArray *)doNotIntrospectClasses
@@ -236,11 +227,60 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
     }
 }
 
+- (void) setMaxReportCount:(int)maxReportCount
+{
+    _maxReportCount = maxReportCount;
+    kscrash_setMaxReportCount(maxReportCount);
+}
+
+- (NSDictionary*) systemInfo
+{
+    KSCrash_MonitorContext fakeEvent = {0};
+    kscm_system_getAPI()->addContextualInfoToEvent(&fakeEvent);
+    NSMutableDictionary* dict = [NSMutableDictionary new];
+
+#define COPY_STRING(A) if (fakeEvent.System.A) dict[@#A] = [NSString stringWithUTF8String:fakeEvent.System.A]
+#define COPY_PRIMITIVE(A) dict[@#A] = @(fakeEvent.System.A)
+    COPY_STRING(systemName);
+    COPY_STRING(systemVersion);
+    COPY_STRING(machine);
+    COPY_STRING(model);
+    COPY_STRING(kernelVersion);
+    COPY_STRING(osVersion);
+    COPY_PRIMITIVE(isJailbroken);
+    COPY_STRING(bootTime);
+    COPY_STRING(appStartTime);
+    COPY_STRING(executablePath);
+    COPY_STRING(executableName);
+    COPY_STRING(bundleID);
+    COPY_STRING(bundleName);
+    COPY_STRING(bundleVersion);
+    COPY_STRING(bundleShortVersion);
+    COPY_STRING(appID);
+    COPY_STRING(cpuArchitecture);
+    COPY_PRIMITIVE(cpuType);
+    COPY_PRIMITIVE(cpuSubType);
+    COPY_PRIMITIVE(binaryCPUType);
+    COPY_PRIMITIVE(binaryCPUSubType);
+    COPY_STRING(timezone);
+    COPY_STRING(processName);
+    COPY_PRIMITIVE(processID);
+    COPY_PRIMITIVE(parentProcessID);
+    COPY_STRING(deviceAppHash);
+    COPY_STRING(buildType);
+    COPY_PRIMITIVE(storageSize);
+    COPY_PRIMITIVE(memorySize);
+    COPY_PRIMITIVE(freeMemory);
+    COPY_PRIMITIVE(usableMemory);
+
+    return dict;
+}
+
 - (BOOL) install
 {
-    _handlingCrashTypes = kscrash_install(self.bundleName.UTF8String,
+    _monitoring = kscrash_install(self.bundleName.UTF8String,
                                           self.basePath.UTF8String);
-    if(self.handlingCrashTypes == 0)
+    if(self.monitoring == 0)
     {
         return false;
     }
@@ -308,15 +348,15 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
          if((self.deleteBehaviorAfterSendAll == KSCDeleteOnSucess && completed) ||
             self.deleteBehaviorAfterSendAll == KSCDeleteAlways)
          {
-             kscrs_deleteAllReports();
+             kscrash_deleteAllReports();
          }
-         kscrash_i_callCompletion(onCompletion, filteredReports, completed, error);
+         kscrash_callCompletion(onCompletion, filteredReports, completed, error);
      }];
 }
 
 - (void) deleteAllReports
 {
-    kscrs_deleteAllReports();
+    kscrash_deleteAllReports();
 }
 
 - (void) reportUserException:(NSString*) name
@@ -324,6 +364,7 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
                     language:(NSString*) language
                   lineOfCode:(NSString*) lineOfCode
                   stackTrace:(NSArray*) stackTrace
+               logAllThreads:(BOOL) logAllThreads
             terminateProgram:(BOOL) terminateProgram
 {
     const char* cName = [name cStringUsingEncoding:NSUTF8StringEncoding];
@@ -345,6 +386,7 @@ IMPLEMENT_EXCLUSIVE_SHARED_INSTANCE(KSCrash)
                                 cLanguage,
                                 cLineOfCode,
                                 cStackTrace,
+                                logAllThreads,
                                 terminateProgram);
 }
 
@@ -367,22 +409,22 @@ SYNTHESIZE_CRASH_STATE_PROPERTY(NSTimeInterval, backgroundDurationSinceLaunch)
 SYNTHESIZE_CRASH_STATE_PROPERTY(int, sessionsSinceLaunch)
 SYNTHESIZE_CRASH_STATE_PROPERTY(BOOL, crashedLastLaunch)
 
-- (NSUInteger) reportCount
+- (int) reportCount
 {
-    return (NSUInteger)kscrs_getReportCount();
+    return kscrash_getReportCount();
 }
 
 - (void) sendReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
     if([reports count] == 0)
     {
-        kscrash_i_callCompletion(onCompletion, reports, YES, nil);
+        kscrash_callCompletion(onCompletion, reports, YES, nil);
         return;
     }
     
     if(self.sink == nil)
     {
-        kscrash_i_callCompletion(onCompletion, reports, NO,
+        kscrash_callCompletion(onCompletion, reports, NO,
                                  [NSError errorWithDomain:[[self class] description]
                                                      code:0
                                               description:@"No sink set. Crash reports not sent."]);
@@ -392,46 +434,18 @@ SYNTHESIZE_CRASH_STATE_PROPERTY(BOOL, crashedLastLaunch)
     [self.sink filterReports:reports
                 onCompletion:^(NSArray* filteredReports, BOOL completed, NSError* error)
      {
-         kscrash_i_callCompletion(onCompletion, filteredReports, completed, error);
+         kscrash_callCompletion(onCompletion, filteredReports, completed, error);
      }];
 }
 
 - (NSData*) loadCrashReportJSONWithID:(int64_t) reportID
 {
-    // Have to do this the ugly way in order to avoid use of exceptions :/
-    char* rawReport = NULL;
-    char* fixedReport = NULL;
-    NSData* jsonData = nil;
-
-    if(reportID <= 0)
+    char* report = kscrash_readReport(reportID);
+    if(report != NULL)
     {
-        KSLOG_ERROR(@"Report ID was %llx", reportID);
-        return nil;
+        return [NSData dataWithBytesNoCopy:report length:strlen(report) freeWhenDone:YES];
     }
-    rawReport = kscrs_readReport(reportID);
-    if(rawReport == NULL)
-    {
-        KSLOG_ERROR(@"Failed to load report ID %llx", reportID);
-    }
-    else
-    {
-        fixedReport = kscrf_fixupCrashReport(rawReport);
-        if(fixedReport == NULL)
-        {
-            KSLOG_ERROR(@"Failed to fixup report ID %llx", reportID);
-        }
-    }
-
-    if(fixedReport != NULL)
-    {
-        jsonData = [NSData dataWithBytesNoCopy:fixedReport length:strlen(fixedReport) freeWhenDone:YES];
-        rawReport = NULL;
-    }
-    if(rawReport != NULL)
-    {
-        free(rawReport);
-    }
-    return jsonData;
+    return nil;
 }
 
 - (void) doctorReport:(NSMutableDictionary*) report
@@ -464,7 +478,7 @@ SYNTHESIZE_CRASH_STATE_PROPERTY(BOOL, crashedLastLaunch)
                                                      error:&error];
     if(error != nil)
     {
-        KSLOG_ERROR(@"Encountered error loading crash report %llx: %@", reportID, error);
+        KSLOG_ERROR(@"Encountered error loading crash report %" PRIx64 ": %@", reportID, error);
     }
     if(crashReport == nil)
     {
@@ -478,9 +492,9 @@ SYNTHESIZE_CRASH_STATE_PROPERTY(BOOL, crashedLastLaunch)
 
 - (NSArray*) allReports
 {
-    int reportCount = kscrs_getReportCount();
+    int reportCount = kscrash_getReportCount();
     int64_t reportIDs[reportCount];
-    reportCount = kscrs_getReportIDs(reportIDs, reportCount);
+    reportCount = kscrash_getReportIDs(reportIDs, reportCount);
     NSMutableArray* reports = [NSMutableArray arrayWithCapacity:(NSUInteger)reportCount];
     for(int i = 0; i < reportCount; i++)
     {
@@ -494,9 +508,10 @@ SYNTHESIZE_CRASH_STATE_PROPERTY(BOOL, crashedLastLaunch)
     return reports;
 }
 
-- (BOOL) redirectConsoleLogToFile
+- (void) setAddConsoleLogToReport:(BOOL) shouldAddConsoleLogToReport
 {
-    return kscrash_redirectConsoleLogToFile();
+    _addConsoleLogToReport = shouldAddConsoleLogToReport;
+    kscrash_setAddConsoleLogToReport(shouldAddConsoleLogToReport);
 }
 
 
@@ -517,39 +532,39 @@ SYNTHESIZE_CRASH_STATE_PROPERTY(BOOL, crashedLastLaunch)
 
 
 // ============================================================================
-#pragma mark - Callbacks -
+#pragma mark - Notifications -
 // ============================================================================
 
 - (void) applicationDidBecomeActive
 {
-    kscrashstate_notifyAppActive(true);
+    kscrash_notifyAppActive(true);
 }
 
 - (void) applicationWillResignActive
 {
-    kscrashstate_notifyAppActive(false);
+    kscrash_notifyAppActive(false);
 }
 
 - (void) applicationDidEnterBackground
 {
-    kscrashstate_notifyAppInForeground(false);
+    kscrash_notifyAppInForeground(false);
 }
 
 - (void) applicationWillEnterForeground
 {
-    kscrashstate_notifyAppInForeground(true);
+    kscrash_notifyAppInForeground(true);
 }
 
 - (void) applicationWillTerminate
 {
-    kscrashstate_notifyAppTerminate();
+    kscrash_notifyAppTerminate();
 }
 
 @end
 
 
 //! Project version number for KSCrashFramework.
-const double KSCrashFrameworkVersionNumber = 1.111;
+const double KSCrashFrameworkVersionNumber = 1.150;
 
 //! Project version string for KSCrashFramework.
-const unsigned char KSCrashFrameworkVersionString[] = "1.11.1";
+const unsigned char KSCrashFrameworkVersionString[] = "1.15.0";

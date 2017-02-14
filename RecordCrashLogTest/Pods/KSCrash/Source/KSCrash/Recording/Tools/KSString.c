@@ -28,6 +28,7 @@
 #include "KSString.h"
 #include <string.h>
 #include <stdlib.h>
+#include "KSSystemCapabilities.h"
 
 
 // Compiler hints for "if" statements
@@ -135,7 +136,15 @@ bool ksstring_extractHexValue(const char* string, int stringLength, uint64_t* co
         const unsigned char* const end = current + stringLength;
         for(;;)
         {
+#if KSCRASH_HAS_STRNSTR
             current = (const unsigned char*)strnstr((const char*)current, "0x", (unsigned)(end - current));
+#else
+            current = (const unsigned char*)strstr((const char*)current, "0x");
+            unlikely_if(current >= end)
+            {
+                return false;
+            }
+#endif
             unlikely_if(!current)
             {
                 return false;
@@ -165,20 +174,4 @@ bool ksstring_extractHexValue(const char* string, int stringLength, uint64_t* co
         }
     }
     return false;
-}
-
-void ksstring_replace(const char** dest, const char* replacement)
-{
-    if(*dest != NULL)
-    {
-        free((void*)*dest);
-    }
-    if(replacement == NULL)
-    {
-        *dest = NULL;
-    }
-    else
-    {
-        *dest = strdup(replacement);
-    }
 }

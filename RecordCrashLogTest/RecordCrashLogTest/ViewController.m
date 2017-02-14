@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import <KSCrash.h>
+#import <KSCrash/KSCrash.h>
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UITextView *crashLogText;
@@ -65,7 +65,7 @@
         case 2:
         {
             // c++ 指针
-            [[KSCrash sharedInstance] deleteAllReports];
+//            [[KSCrash sharedInstance] deleteAllReports];
         }
             break;
         case 3:

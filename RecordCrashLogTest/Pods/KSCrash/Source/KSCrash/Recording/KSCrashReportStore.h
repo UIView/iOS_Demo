@@ -48,12 +48,11 @@ void kscrs_initialize(const char* appName, const char* reportsPath);
  *
  * @param crashReportPathBuffer Buffer to store the crash report path.
  */
-void kscrs_getCrashReportPath(char* crashReportPathBuffer);
+void kscrs_getNextCrashReportPath(char* crashReportPathBuffer);
 
 /** Get the number of reports on disk.
  */
 int kscrs_getReportCount();
-
 
 /** Get a list of IDs for all reports on disk.
  *
@@ -77,28 +76,20 @@ char* kscrs_readReport(int64_t reportID);
  *
  * @param report The report's contents (must be JSON encoded).
  * @param reportLength The length of the report in bytes.
+ *
+ * @return the new report's ID.
  */
-void kscrs_addUserReport(const char* report, int reportLength);
+int64_t kscrs_addUserReport(const char* report, int reportLength);
 
 /** Delete all reports on disk.
  */
 void kscrs_deleteAllReports();
 
-
-/** Increment the crash report index.
- * Internal function. Do not use.
+/** Set the maximum number of reports allowed on disk before old ones get deleted.
+ *
+ * @param maxReportCount The maximum number of reports.
  */
-void kscrsi_incrementCrashReportIndex();
-
-/** Get the next crash report ID.
- * Internal function. Do not use.
- */
-int64_t kscrsi_getNextCrashReportID();
-
-/** Get the next user report ID.
- * Internal function. Do not use.
- */
-int64_t kscrsi_getNextUserReportID();
+    void kscrs_setMaxReportCount(int maxReportCount);
 
 #ifdef __cplusplus
 }

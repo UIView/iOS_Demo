@@ -6,5 +6,6 @@ target 'RecordCrashLogTest' do
   # use_frameworks!
   # Pods for RecordCrashLogTest
   pod 'AvoidCrash', '~> 1.6.2'
-  pod 'KSCrash', '~> 1.11.1'
+  pod 'Bugly'
+  pod 'KSCrash', '~> 1.15.0'
 end

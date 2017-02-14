@@ -22,8 +22,8 @@
 volatile int32_t UncaughtExceptionCount = 0;
 const int32_t UncaughtExceptionMaximum = 10;
 
-const NSInteger UncaughtExceptionHandlerSkipAddressCount = 4;
-const NSInteger UncaughtExceptionHandlerReportAddressCount = 5;
+const NSInteger UncaughtExceptionHandlerSkipAddressCount = 1;
+const NSInteger UncaughtExceptionHandlerReportAddressCount = 8;
 
 @interface RHCrashLogHelp (){
     BOOL dismissed;
@@ -109,14 +109,17 @@ void InstallRHCrashUncaughtExceptionHandler(void)
     if (fileError) {
         NSLog(@"\n[Log write To File Error] =%@", fileError);
     }
-    
+    NSLog(@"\n[Log Error] callStackSymbols=\n %@ \n [callStackReturnAddresses]=\n %@", exception.callStackSymbols,exception.callStackReturnAddresses);
+
     //    NSLog(@"\nwriteToFile =%@ \n\n", @(isSave));
 }
 
 
 - (void)handleException:(NSException *)exception
 {
-    
+    if (!exception) {
+        return;
+    }
     [self validateAndSaveCriticalApplicationData:exception];
     
     dismissed = YES;

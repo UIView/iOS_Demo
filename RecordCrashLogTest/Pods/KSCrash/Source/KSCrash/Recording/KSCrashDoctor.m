@@ -8,10 +8,7 @@
 
 #import "KSCrashDoctor.h"
 #import "KSCrashReportFields.h"
-#import "KSSystemInfo.h"
-
-
-#define kUserCrashHandler "kscrw_i_callUserCrashHandler"
+#import "KSCrashMonitor_System.h"
 
 
 typedef enum
@@ -203,7 +200,7 @@ typedef enum
 - (CPUFamily) cpuFamily:(NSDictionary*) report
 {
     NSDictionary* system = [self systemReport:report];
-    NSString* cpuArch = [system objectForKey:@KSSystemField_CPUArch];
+    NSString* cpuArch = [system objectForKey:@KSCrashField_CPUArch];
     if([cpuArch rangeOfString:@"arm"].location == 0)
     {
         return CPUFamilyArm;
@@ -524,7 +521,7 @@ typedef enum
         {
             NSDictionary* exception = [errorReport objectForKey:@KSCrashField_NSException];
             NSString* name = [exception objectForKey:@KSCrashField_Name];
-            NSString* reason = [exception objectForKey:@KSCrashField_Reason];
+            NSString* reason = [exception objectForKey:@KSCrashField_Reason]? [exception objectForKey:@KSCrashField_Reason]:[errorReport objectForKey:@KSCrashField_Reason];
             return [self appendOriginatingCall:[NSString stringWithFormat:@"Application threw exception %@: %@",
                                                 name, reason]
                                       callName:lastFunctionName];

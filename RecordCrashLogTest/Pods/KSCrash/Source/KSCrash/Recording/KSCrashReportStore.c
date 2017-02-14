@@ -31,6 +31,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,9 +39,10 @@
 #include <unistd.h>
 
 
-static const int g_maxReports = 5;
-static int64_t g_nextCrashID;
-static int64_t g_nextUserReportID;
+static int g_maxReportCount = 5;
+// Have to use max 32-bit atomics because of MIPS.
+static _Atomic(uint32_t) g_nextUniqueIDLow;
+static int64_t g_nextUniqueIDHigh;
 static const char* g_appName;
 static const char* g_reportsPath;
 static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -59,6 +61,10 @@ static int compareInt64(const void* a, const void* b)
     return 0;
 }
 
+static inline int64_t getNextUniqueID()
+{
+    return g_nextUniqueIDHigh + g_nextUniqueIDLow++;
+}
 
 static void getCrashReportPathByID(int64_t id, char* pathBuffer)
 {
@@ -69,7 +75,7 @@ static void getCrashReportPathByID(int64_t id, char* pathBuffer)
 static int64_t getReportIDFromFilename(const char* filename)
 {
     char scanFormat[100];
-    sprintf(scanFormat, "%s-report-%%llx.json", g_appName);
+    sprintf(scanFormat, "%s-report-%%" PRIx64 ".json", g_appName);
     
     int64_t reportID = 0;
     sscanf(filename, scanFormat, &reportID);
@@ -142,12 +148,12 @@ done:
 static void pruneReports()
 {
     int reportCount = getReportCount();
-    if(reportCount > g_maxReports)
+    if(reportCount > g_maxReportCount)
     {
         int64_t reportIDs[reportCount];
         reportCount = getReportIDs(reportIDs, reportCount);
         
-        for(int i = 0; i < reportCount - g_maxReports; i++)
+        for(int i = 0; i < reportCount - g_maxReportCount; i++)
         {
             deleteReportWithID(reportIDs[i]);
         }
@@ -161,14 +167,14 @@ static void initializeIDs()
     struct tm time;
     gmtime_r(&rawTime, &time);
     int64_t baseID = (int64_t)time.tm_sec
-                     + (int64_t)time.tm_min * 61
-                     + (int64_t)time.tm_hour * 61 * 60
-                     + (int64_t)time.tm_yday * 61 * 60 * 24
-                     + (int64_t)time.tm_year * 61 * 60 * 24 * 366;
+                   + (int64_t)time.tm_min * 61
+                   + (int64_t)time.tm_hour * 61 * 60
+                   + (int64_t)time.tm_yday * 61 * 60 * 24
+                   + (int64_t)time.tm_year * 61 * 60 * 24 * 366;
     baseID <<= 23;
 
-    g_nextCrashID = baseID | 0x400000;
-    g_nextUserReportID = baseID;
+    g_nextUniqueIDHigh = baseID & ~0xffffffff;
+    g_nextUniqueIDLow = (uint32_t)(baseID & 0xffffffff);
 }
 
 
@@ -185,11 +191,9 @@ void kscrs_initialize(const char* appName, const char* reportsPath)
     pthread_mutex_unlock(&g_mutex);
 }
 
-void kscrs_getCrashReportPath(char* crashReportPathBuffer)
+void kscrs_getNextCrashReportPath(char* crashReportPathBuffer)
 {
-    pthread_mutex_lock(&g_mutex);
-    getCrashReportPathByID(g_nextCrashID, crashReportPathBuffer);
-    pthread_mutex_unlock(&g_mutex);
+    getCrashReportPathByID(getNextUniqueID(), crashReportPathBuffer);
 }
 
 int kscrs_getReportCount()
@@ -214,17 +218,17 @@ char* kscrs_readReport(int64_t reportID)
     char path[KSCRS_MAX_PATH_LENGTH];
     getCrashReportPathByID(reportID, path);
     char* result;
-    ksfu_readEntireFile(path, &result, NULL);
+    ksfu_readEntireFile(path, &result, NULL, 2000000);
     pthread_mutex_unlock(&g_mutex);
     return result;
 }
 
-void kscrs_addUserReport(const char* report, int reportLength)
+int64_t kscrs_addUserReport(const char* report, int reportLength)
 {
     pthread_mutex_lock(&g_mutex);
+    int64_t currentID = getNextUniqueID();
     char crashReportPath[KSCRS_MAX_PATH_LENGTH];
-    getCrashReportPathByID(g_nextUserReportID, crashReportPath);
-    g_nextUserReportID++;
+    getCrashReportPathByID(currentID, crashReportPath);
 
     int fd = open(crashReportPath, O_WRONLY | O_CREAT, 0644);
     if(fd < 0)
@@ -241,7 +245,7 @@ void kscrs_addUserReport(const char* report, int reportLength)
     }
     else if(bytesWritten < reportLength)
     {
-        KSLOG_ERROR("Expected to write %lull bytes to file %s, but only wrote %ll", crashReportPath, reportLength, bytesWritten);
+        KSLOG_ERROR("Expected to write %d bytes to file %s, but only wrote %d", crashReportPath, reportLength, bytesWritten);
     }
 
 done:
@@ -250,6 +254,8 @@ done:
         close(fd);
     }
     pthread_mutex_unlock(&g_mutex);
+
+    return currentID;
 }
 
 void kscrs_deleteAllReports()
@@ -259,20 +265,7 @@ void kscrs_deleteAllReports()
     pthread_mutex_unlock(&g_mutex);
 }
 
-
-// Internal API
-
-void kscrsi_incrementCrashReportIndex()
+void kscrs_setMaxReportCount(int maxReportCount)
 {
-    g_nextCrashID++;
-}
-
-int64_t kscrsi_getNextCrashReportID()
-{
-    return g_nextCrashID;
-}
-
-int64_t kscrsi_getNextUserReportID()
-{
-    return g_nextUserReportID;
+    g_maxReportCount = maxReportCount;
 }

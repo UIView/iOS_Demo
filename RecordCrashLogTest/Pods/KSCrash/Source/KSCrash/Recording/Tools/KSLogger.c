@@ -26,6 +26,7 @@
 
 
 #include "KSLogger.h"
+#include "KSSystemCapabilities.h"
 
 // ===========================================================================
 #pragma mark - Common -
@@ -57,6 +58,8 @@
 #define KSLOGGER_CBufferSize 1024
 #endif
 
+/** Where console logs will be written */
+static char g_logFilename[1024];
 
 /** Write a formatted string to the log.
  *
@@ -77,7 +80,7 @@ static void writeFmtArgsToLog(const char* fmt, va_list args);
 static void flushLog(void);
 
 
-const char* kslog_i_lastPathEntry(const char* const path)
+static inline const char* lastPathEntry(const char* const path)
 {
     const char* lastFile = strrchr(path, '/');
     return lastFile == 0 ? path : lastFile + 1;
@@ -94,36 +97,40 @@ static inline void writeFmtToLog(const char* fmt, ...)
 #if KSLOGGER_CBufferSize > 0
 
 /** The file descriptor where log entries get written. */
-static int g_fd = STDOUT_FILENO;
+static int g_fd = -1;
 
 
-void kslog_i_writeToLog(const char* const str)
+static void writeToLog(const char* const str)
 {
-    int bytesToWrite = (int)strlen(str);
-    const char* pos = str;
-    while(bytesToWrite > 0)
+    if(g_fd >= 0)
     {
-        int bytesWritten = (int)write(g_fd, pos, (unsigned)bytesToWrite);
-        unlikely_if(bytesWritten == -1)
+        int bytesToWrite = (int)strlen(str);
+        const char* pos = str;
+        while(bytesToWrite > 0)
         {
-            return;
+            int bytesWritten = (int)write(g_fd, pos, (unsigned)bytesToWrite);
+            unlikely_if(bytesWritten == -1)
+            {
+                break;
+            }
+            bytesToWrite -= bytesWritten;
+            pos += bytesWritten;
         }
-        bytesToWrite -= bytesWritten;
-        pos += bytesWritten;
     }
+    write(STDOUT_FILENO, str, strlen(str));
 }
 
 static inline void writeFmtArgsToLog(const char* fmt, va_list args)
 {
     unlikely_if(fmt == NULL)
     {
-        kslog_i_writeToLog("(null)");
+        writeToLog("(null)");
     }
     else
     {
         char buffer[KSLOGGER_CBufferSize];
         vsnprintf(buffer, sizeof(buffer), fmt, args);
-        kslog_i_writeToLog(buffer);
+        writeToLog(buffer);
     }
 }
 
@@ -143,22 +150,24 @@ static inline void setLogFD(int fd)
 
 bool kslog_setLogFilename(const char* filename, bool overwrite)
 {
-    if(filename == NULL)
+    static int fd = -1;
+    if(filename != NULL)
     {
-        setLogFD(STDOUT_FILENO);
-        return true;
-    }
-    
-    int openMask = O_WRONLY | O_CREAT;
-    if(overwrite)
-    {
-        openMask |= O_TRUNC;
-    }
-    int fd = open(filename, openMask, 0644);
-    unlikely_if(fd < 0)
-    {
-        writeFmtToLog("KSLogger: Could not open %s: %s", filename, strerror(errno));
-        return false;
+        int openMask = O_WRONLY | O_CREAT;
+        if(overwrite)
+        {
+            openMask |= O_TRUNC;
+        }
+        fd = open(filename, openMask, 0644);
+        unlikely_if(fd < 0)
+        {
+            writeFmtToLog("KSLogger: Could not open %s: %s", filename, strerror(errno));
+            return false;
+        }
+        if(filename != g_logFilename)
+        {
+            strncpy(g_logFilename, filename, sizeof(g_logFilename));
+        }
     }
     
     setLogFD(fd);
@@ -178,14 +187,13 @@ static inline void setLogFD(FILE* file)
     g_file = file;
 }
 
-void kslog_i_writeToLog(const char* const str)
+void writeToLog(const char* const str)
 {
-    unlikely_if(g_file == NULL)
+    if(g_file != NULL)
     {
-        g_file = stdout;
+        fprintf(g_file, "%s", str);
     }
-    
-    fprintf(g_file, "%s", str);
+    fprintf(stdout, "%s", str);
 }
 
 static inline void writeFmtArgsToLog(const char* fmt, va_list args)
@@ -197,7 +205,7 @@ static inline void writeFmtArgsToLog(const char* fmt, va_list args)
     
     if(fmt == NULL)
     {
-        kslog_i_writeToLog("(null)");
+        writeToLog("(null)");
     }
     else
     {
@@ -212,24 +220,37 @@ static inline void flushLog(void)
 
 bool kslog_setLogFilename(const char* filename, bool overwrite)
 {
-    if(filename == NULL)
+    static FILE* file = NULL;
+    FILE* oldFile = file;
+    if(filename != NULL)
     {
-        setLogFD(stdout);
-        return true;
+        file = fopen(filename, overwrite ? "wb" : "ab");
+        unlikely_if(file == NULL)
+        {
+            writeFmtToLog("KSLogger: Could not open %s: %s", filename, strerror(errno));
+            return false;
+        }
     }
-    
-    FILE* file = fopen(filename, overwrite ? "wb" : "ab");
-    unlikely_if(file == NULL)
+    if(filename != g_logFilename)
     {
-        writeFmtToLog("KSLogger: Could not open %s: %s", filename, strerror(errno));
-        return false;
+        strncpy(g_logFilename, filename, sizeof(g_logFilename));
     }
-    
+
+    if(oldFile != NULL)
+    {
+        fclose(oldFile);
+    }
+
     setLogFD(file);
     return true;
 }
 
 #endif
+
+bool kslog_clearLogFile()
+{
+    return kslog_setLogFilename(g_logFilename, true);
+}
 
 
 // ===========================================================================
@@ -242,7 +263,7 @@ void i_kslog_logCBasic(const char* const fmt, ...)
     va_start(args,fmt);
     writeFmtArgsToLog(fmt, args);
     va_end(args);
-    kslog_i_writeToLog("\n");
+    writeToLog("\n");
     flushLog();
 }
 
@@ -252,12 +273,12 @@ void i_kslog_logC(const char* const level,
                   const char* const function,
                   const char* const fmt, ...)
 {
-    writeFmtToLog("%s: %s (%u): %s: ", level, kslog_i_lastPathEntry(file), line, function);
+    writeFmtToLog("%s: %s (%u): %s: ", level, lastPathEntry(file), line, function);
     va_list args;
     va_start(args,fmt);
     writeFmtArgsToLog(fmt, args);
     va_end(args);
-    kslog_i_writeToLog("\n");
+    writeToLog("\n");
     flushLog();
 }
 
@@ -266,13 +287,14 @@ void i_kslog_logC(const char* const level,
 #pragma mark - Objective-C -
 // ===========================================================================
 
+#if KSCRASH_HAS_OBJC
 #include <CoreFoundation/CoreFoundation.h>
 
 void i_kslog_logObjCBasic(CFStringRef fmt, ...)
 {
     if(fmt == NULL)
     {
-        kslog_i_writeToLog("(null)");
+        writeToLog("(null)");
         return;
     }
     
@@ -285,13 +307,13 @@ void i_kslog_logObjCBasic(CFStringRef fmt, ...)
     char* stringBuffer = malloc((unsigned)bufferLength);
     if(CFStringGetCString(entry, stringBuffer, (CFIndex)bufferLength, kCFStringEncodingUTF8))
     {
-        kslog_i_writeToLog(stringBuffer);
+        writeToLog(stringBuffer);
     }
     else
     {
-        kslog_i_writeToLog("Could not convert log string to UTF-8. No logging performed.");
+        writeToLog("Could not convert log string to UTF-8. No logging performed.");
     }
-    kslog_i_writeToLog("\n");
+    writeToLog("\n");
     
     free(stringBuffer);
     CFRelease(entry);
@@ -307,7 +329,7 @@ void i_kslog_logObjC(const char* const level,
     if(fmt == NULL)
     {
         logFmt = CFStringCreateWithCString(NULL, "%s: %s (%u): %s: (null)", kCFStringEncodingUTF8);
-        i_kslog_logObjCBasic(logFmt, level, kslog_i_lastPathEntry(file), line, function);
+        i_kslog_logObjCBasic(logFmt, level, lastPathEntry(file), line, function);
     }
     else
     {
@@ -317,9 +339,10 @@ void i_kslog_logObjC(const char* const level,
         va_end(args);
         
         logFmt = CFStringCreateWithCString(NULL, "%s: %s (%u): %s: %@", kCFStringEncodingUTF8);
-        i_kslog_logObjCBasic(logFmt, level, kslog_i_lastPathEntry(file), line, function, entry);
+        i_kslog_logObjCBasic(logFmt, level, lastPathEntry(file), line, function, entry);
         
         CFRelease(entry);
     }
     CFRelease(logFmt);
 }
+#endif // KSCRASH_HAS_OBJC

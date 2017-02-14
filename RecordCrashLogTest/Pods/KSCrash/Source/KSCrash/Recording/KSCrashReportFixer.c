@@ -25,10 +25,13 @@
 //
 
 #include "KSCrashReportFields.h"
+#include "KSSystemCapabilities.h"
 #include "KSJSONCodec.h"
-#include "DemangleCPP.h"
-#include "DemangleSwift.h"
-#include "RFC3339UTFString.h"
+#include "KSDemangle_CPP.h"
+#if KSCRASH_HAS_SWIFT
+#include "KSDemangle_Swift.h"
+#endif
+#include "KSDate.h"
 #include "KSLogger.h"
 
 #include <stdlib.h>
@@ -158,7 +161,7 @@ static int onIntegerElement(const char* const name,
     if(shouldFixDate(context, name))
     {
         char buffer[21];
-        rfc3339UtcStringFromUNIXTimestamp((time_t)value, buffer);
+        ksdate_utcStringFromTimestamp((time_t)value, buffer);
 
         result = ksjson_addStringElement(context->encodeContext, name, buffer, (int)strlen(buffer));
     }
@@ -185,11 +188,13 @@ static int onStringElement(const char* const name,
     char* demangled = NULL;
     if(shouldDemangle(context, name))
     {
-        demangled = demangleCPP(value);
+        demangled = ksdm_demangleCPP(value);
+#if KSCRASH_HAS_SWIFT
         if(demangled == NULL)
         {
-            demangled = demangleSwift(value);
+            demangled = ksdm_demangleSwift(value);
         }
+#endif
         if(demangled != NULL)
         {
             stringValue = demangled;
