@@ -25,10 +25,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    [JSPatch startWithAppKey:@"d5a400775967c3c7"];
-    NSString *jsRsaPubKey =@"\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIkBI1SUhRL3fPF6/A+0lNrlDU\n0R76w5zCkXcL2/0HRLQAj3VWdRJfwcEQ3RvoZSMaLDBkhlBr8WKrNCF0+ILxwdZl\nOjC9z9JJYsU212IvEFitWGdq0bBRNumNPYrDwc8LtXkVjDxzXMPpQYOTKBrHmYv5\nsLJZXsQUDYsgKhP9SQIDAQAB\n";
-    [JSPatch setupRSAPublicKey:jsRsaPubKey];
-
+    [self installJSPatchSDK];
     return YES;
 }
 
@@ -52,10 +49,7 @@
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-#ifdef DEBUG
-    [JSPatch setupDevelopment];
-#endif
-    [JSPatch sync];
+    [self syncUpdateJSPatchCode];
 }
 
 
@@ -63,5 +57,19 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
+#pragma mark JSPatch
 
+-(void)installJSPatchSDK{
+    // TEST KEY: d5a400775967c3c7
+    [JSPatch startWithAppKey:@"d5a400775967c3c7"];
+    NSString *jsRsaPubKey =@"\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIkBI1SUhRL3fPF6/A+0lNrlDU\n0R76w5zCkXcL2/0HRLQAj3VWdRJfwcEQ3RvoZSMaLDBkhlBr8WKrNCF0+ILxwdZl\nOjC9z9JJYsU212IvEFitWGdq0bBRNumNPYrDwc8LtXkVjDxzXMPpQYOTKBrHmYv5\nsLJZXsQUDYsgKhP9SQIDAQAB\n";
+    [JSPatch setupRSAPublicKey:jsRsaPubKey];
+}
+
+-(void)syncUpdateJSPatchCode{
+#ifdef DEBUG
+    [JSPatch setupDevelopment];
+#endif
+    [JSPatch sync];
+}
 @end
