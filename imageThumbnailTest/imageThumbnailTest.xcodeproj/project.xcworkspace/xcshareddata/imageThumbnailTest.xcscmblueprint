@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : 9223372036854775807,
+    "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "BBE9C405-3786-46A6-A1A1-6619D0BF5218",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093" : "",
+    "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8" : "iOS_Demo\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "imageThumbnailTest",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "imageThumbnailTest\/imageThumbnailTest.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/UIView\/learn_objec_demo.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "253FBA1E5AC2E96E76DCEFD96B65C7B26C082093"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/UIView\/iOS_Demo.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5984E69F778EF29BCA0DB2AB95BB1412B9F8F3B8"
+    }
+  ]
+}
